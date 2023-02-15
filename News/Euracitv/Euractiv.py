@@ -31,6 +31,7 @@ class Euractiv:
         self.authorsBio = []
 
     def searchKeywords(self):
+        print("Searching")
         for key in self.keywords:
             print(key)
             print(url+'?s='+key)
@@ -44,74 +45,80 @@ class Euractiv:
             items = int(soup.select_one('h4.text-center').text.split(" ")[0])
             pages = math.ceil(items/24)
             if pages > 1:
-                urls = [url + f'page/{j}/?s=' for j in range(2,3)]
+                urls = [url + f'page/{j}/?s=' for j in range(2,pages+1)]
                 urls = [urll + key for urll in urls]
                 reqs = (grequests.get(urrl, headers=self.headers) for urrl in urls)
-                responses = grequests.map(reqs, size=5)
+                responses = grequests.map(reqs, size=20)
                 for resp in responses:
                     print(resp.url)
-                    soup = BeautifulSoup(resp.text,'html.parser')
-                    links = soup.select('h3>a')
+                    soupp = BeautifulSoup(resp.text,'html.parser')
+                    links = soupp.select('h3>a')
                     self.responses.extend(link['href'] for link in links)
                     for kk in range(len(links)):
                         self.keyUsed.append(key.replace("+"," "))
                 print(len(self.responses))
 
     def parseSearchResults(self):
-        reqs = (grequests.get(url, headers=self.headers) for url in self.responses)
-        responses = grequests.map(reqs, size=24)
+        print("Parcing Search Results")
+        # reqs = (grequests.get(url, headers=self.headers) for url in self.responses)
+        # responses = grequests.map(reqs, size=24)
         kkk = 0
-        for resp in responses:
+        # for resp in responses:
+        for i in self.responses:
+            resp = requests.get(i, headers=self.headers)
             print(kkk, " : ", resp.status_code, resp.url)
-            soup = BeautifulSoup(resp.text, 'html.parser')
-            # print(resp.url)
-            self.newsPlatform.append(self.platform)
-            self.article_Url.append(resp.url)
-            # print(soup.select_one('.ea-post-title>h1').text)
-            self.article_Title.append(soup.select_one('.ea-post-title>h1').text)
-            # print(soup.select_one('p>.author')['href'])
-            id = soup.select('p>.author')
-            if len(id)>2:
-                lis1 = []
-                lis2 = []
-                lis3 = []
-                lis4 = []
-                lis5 = []
-                lis6 = []
-                for idd in id:
-                    if 'euractiv' in idd.text.lower():
-                        continue
-                    liss = self.parseAuthors(idd['id'])
-                    lis1.append(idd.text)
-                    lis2.append(liss[1])
-                    lis3.append(liss[2])
-                    lis4.append(liss[3])
-                    lis5.append(liss[4])
-                    lis6.append(idd['href'])
+            if resp.status_code == 200:    
+                soup = BeautifulSoup(resp.text, 'html.parser')
+                # print(resp.url)
+                self.newsPlatform.append(self.platform)
+                self.article_Url.append(resp.url)
+                # print(soup.select_one('.ea-post-title>h1').text)
+                self.article_Title.append(soup.select_one('.ea-post-title>h1').text)
+                # print(soup.select_one('p>.author')['href'])
+                id = soup.select('p>.author')
+                if len(id)>2:
+                    lis1 = []
+                    lis2 = []
+                    lis3 = []
+                    lis4 = []
+                    lis5 = []
+                    lis6 = []
+                    for idd in id:
+                        if 'euractiv' in idd.text.lower():
+                            continue
+                        liss = self.parseAuthors(idd['id'])
+                        lis1.append(idd.text)
+                        lis2.append(liss[1])
+                        lis3.append(liss[2])
+                        lis4.append(liss[3])
+                        lis5.append(liss[4])
+                        lis6.append(idd['href'])
 
-                self.authors.append(lis1)
-                self.authorsBio.append(self.checker(lis2))
-                self.twitter.append(self.checker(lis3))
-                self.email.append(self.checker(lis4))
-                self.authorImg.append(self.checker(lis5))
-                self.authUrls.append(lis6)
-            # print(id)
-            elif len(id)==0:
-                self.authors.append("")
-                self.authorsBio.append("")
-                self.twitter.append("")
-                self.email.append("")
-                self.authorImg.append("")
-                self.authUrls.append("")
+                    self.authors.append(lis1)
+                    self.authorsBio.append(self.checker(lis2))
+                    self.twitter.append(self.checker(lis3))
+                    self.email.append(self.checker(lis4))
+                    self.authorImg.append(self.checker(lis5))
+                    self.authUrls.append(lis6)
+                # print(id)
+                elif len(id)==0:
+                    self.authors.append("")
+                    self.authorsBio.append("")
+                    self.twitter.append("")
+                    self.email.append("")
+                    self.authorImg.append("")
+                    self.authUrls.append("")
+                else:
+                    liss = self.parseAuthors(id[0]['id'])
+                    self.authors.append(id[0].text)
+                    self.authorsBio.append(liss[1])
+                    self.twitter.append(liss[2])
+                    self.email.append(liss[3])
+                    self.authorImg.append(liss[4])
+                    self.authUrls.append(id[0]['href'])
+                kkk = kkk + 1
             else:
-                liss = self.parseAuthors(id[0]['id'])
-                self.authors.append(id[0].text)
-                self.authorsBio.append(liss[1])
-                self.twitter.append(liss[2])
-                self.email.append(liss[3])
-                self.authorImg.append(liss[4])
-                self.authUrls.append(id[0]['href'])
-            kkk = kkk + 1
+                self.keyUsed.pop(kkk)
 
     def checker(self, lis):
         if len(lis)==1:

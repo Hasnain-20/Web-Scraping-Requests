@@ -1,5 +1,3 @@
-from http.client import responses
-from platform import platform
 from bs4 import BeautifulSoup
 import grequests
 import requests
@@ -48,7 +46,7 @@ class PoliticoEU:
     def searchKeywords(self):
         for key in self.keywords:
             print(key)
-            for i in range(0,1):
+            for i in range(0,50):
                 print(i,end=", ", flush=True)
                 response = requests.post(
                     'https://a3cxkoqgf3-dsn.algolia.net/1/indexes/*/queries?x-algolia-agent=Algolia%20for%20JavaScript%20(4.14.2)%3B%20Browser%20(lite)%3B%20instantsearch.js%20(4.47.0)%3B%20JS%20Helper%20(3.11.1)&x-algolia-api-key=138da0d7b154a5032735cfdcfda0e3cf&x-algolia-application-id=A3CXKOQGF3',

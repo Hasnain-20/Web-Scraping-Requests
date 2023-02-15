@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import grequests
 import requests
 import pandas as pd
+import spacy
 
 class Euractiv:
 
@@ -15,6 +16,7 @@ class Euractiv:
         self.url = url
         self.keywords = ['Digital Market Act', 'Digital Services Act', 'GDPR', 'Data Privacy', 'Cybsersecurity', 'ePrivacy Regulation', 'Copyright Directive', 'Data Governance Act' , 'The Cybersecurity Act']
         self.keywords = [i.replace(" ","+") for i in self.keywords]
+        self.nlp = spacy.load('en_core_web_sm')
 
         self.platform = splat
         self.newsPlatform = []
@@ -29,6 +31,7 @@ class Euractiv:
         self.authUrls = []
         self.article_Url = []
         self.authorsBio = []
+        self.nouns = []
 
     def searchKeywords(self):
         print("Searching")
@@ -44,6 +47,7 @@ class Euractiv:
             print(len(self.responses))
             items = int(soup.select_one('h4.text-center').text.split(" ")[0])
             pages = math.ceil(items/24)
+            pages = 0
             if pages > 1:
                 urls = [url + f'page/{j}/?s=' for j in range(2,pages+1)]
                 urls = [urll + key for urll in urls]
@@ -74,6 +78,11 @@ class Euractiv:
                 self.article_Url.append(resp.url)
                 # print(soup.select_one('.ea-post-title>h1').text)
                 self.article_Title.append(soup.select_one('.ea-post-title>h1').text)
+                arti = soup.select('.ea-article-body-content>p')
+                aritcle = ""
+                for parag in arti:
+                    aritcle = aritcle + parag.text
+                self.extract_Nouns(aritcle)
                 # print(soup.select_one('p>.author')['href'])
                 id = soup.select('p>.author')
                 if len(id)>2:
@@ -127,6 +136,15 @@ class Euractiv:
             return ""
         else:
             return lis
+    
+    def extract_Nouns(self, text):
+        doc = self.nlp(text)
+        name = [ent.text for ent in doc.ents if ent.label_ == 'PERSON']
+        # print(name)
+        names = set()
+        for n in name:
+            names.add(n)
+        self.nouns.append(names)
 
     def parseAuthors(self,id):
         data = {
@@ -178,7 +196,7 @@ class Euractiv:
         df = pd.DataFrame({"Platform" : self.newsPlatform, "Article Title" : self.article_Title, "Article Url" : self.article_Url,
                             "Keyword" : self.keyUsed, "Authors Name": self.authors,"Authros Email" : self.email, 
                            "Authors Twitter" : self.twitter, "Authors Image" : self.authorImg, "Authors Bio" : self.authorsBio,
-                           "Authors Page Url" : self.authUrls})
+                           "Authors Page Url" : self.authUrls, "List of Nouns" : self.nouns})
         df.to_csv(f'{self.platform}.csv', encoding='utf-8-sig', index=False)
         return df
 

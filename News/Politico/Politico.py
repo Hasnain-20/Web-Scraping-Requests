@@ -61,7 +61,7 @@ class PoliticoEU:
                         self.keyUsed.append(key.replace("%20"," "))
                         self.newsPlatform.append(self.platform)
                     self.responses.append(response)
-            print()
+            print(len(self.responses))
 
     def parseSearchResults(self):
         for resp in self.responses:

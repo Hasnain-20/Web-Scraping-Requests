@@ -4,6 +4,7 @@ import grequests
 import requests
 import pandas as pd
 import spacy
+import html
 
 class Euractiv:
 
@@ -82,7 +83,7 @@ class Euractiv:
                 aritcle = ""
                 for parag in arti:
                     aritcle = aritcle + parag.text
-                self.extract_Nouns(aritcle)
+                self.extract_Nouns(html.unescape(aritcle))
                 # print(soup.select_one('p>.author')['href'])
                 id = soup.select('p>.author')
                 if len(id)>2:
@@ -141,10 +142,13 @@ class Euractiv:
         doc = self.nlp(text)
         name = [ent.text for ent in doc.ents if ent.label_ == 'PERSON']
         # print(name)
-        names = set()
-        for n in name:
-            names.add(n)
-        self.nouns.append(names)
+        if name:
+            names = set()
+            for n in name:
+                names.add(n)
+            self.nouns.append(names)
+        else:
+            self.nouns.append("")
 
     def parseAuthors(self,id):
         data = {

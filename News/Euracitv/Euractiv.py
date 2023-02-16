@@ -48,7 +48,6 @@ class Euractiv:
             print(len(self.responses))
             items = int(soup.select_one('h4.text-center').text.split(" ")[0])
             pages = math.ceil(items/24)
-            pages = 0
             if pages > 1:
                 urls = [url + f'page/{j}/?s=' for j in range(2,pages+1)]
                 urls = [urll + key for urll in urls]

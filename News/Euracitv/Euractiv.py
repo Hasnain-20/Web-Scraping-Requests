@@ -52,7 +52,7 @@ class Euractiv:
                 urls = [url + f'page/{j}/?s=' for j in range(2,pages+1)]
                 urls = [urll + key for urll in urls]
                 reqs = (grequests.get(urrl, headers=self.headers) for urrl in urls)
-                responses = grequests.map(reqs, size=9)
+                responses = grequests.map(reqs, size=7)
                 for resp in responses:
                 # for ur in urls:
                 #     resp = requests.get(ur, headers=self.headers)
@@ -67,7 +67,7 @@ class Euractiv:
     def parseSearchResults(self):
         print("Parcing Search Results")
         reqs = (grequests.get(url, headers=self.headers) for url in self.responses)
-        responses = grequests.map(reqs, size=9)
+        responses = grequests.map(reqs, size=7)
         kkk = 0
         for resp in responses:
         # for i in self.responses:
@@ -83,7 +83,7 @@ class Euractiv:
                 arti = soup.select('.ea-article-body-content>p')
                 aritcle = ""
                 for parag in arti:
-                    aritcle = aritcle + parag.text
+                    aritcle = aritcle + ' ' + parag.text
                 self.extract_Nouns(html.unescape(aritcle))
                 # print(soup.select_one('p>.author')['href'])
                 id = soup.select('p>.author')

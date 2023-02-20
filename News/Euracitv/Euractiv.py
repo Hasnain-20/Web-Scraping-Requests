@@ -66,12 +66,12 @@ class Euractiv:
 
     def parseSearchResults(self):
         print("Parcing Search Results")
-        reqs = (grequests.get(url, headers=self.headers) for url in self.responses)
-        responses = grequests.map(reqs, size=7)
+        # reqs = (grequests.get(url, headers=self.headers) for url in self.responses)
+        # responses = grequests.map(reqs, size=7)
         kkk = 0
-        for resp in responses:
-        # for i in self.responses:
-        #     resp = requests.get(i, headers=self.headers)
+        # for resp in responses:
+        for i in self.responses:
+            resp = requests.get(i, headers=self.headers)
             print(kkk, " : ", resp.status_code, resp.url)
             if resp.status_code == 200:    
                 soup = BeautifulSoup(resp.text, 'html.parser')
